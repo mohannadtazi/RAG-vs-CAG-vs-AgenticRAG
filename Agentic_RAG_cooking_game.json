@@ -1,0 +1,192 @@
+{
+  "name": "Agentic-RAG_cooking_game",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "c2fc8ef6-3233-49b2-8c38-4195ffd23e58",
+      "name": "When chat message received",
+      "webhookId": "7d4957d3-f07d-4505-b255-a80507a95549"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=You are ChefBot, an AI assistant designed to help users find and prepare delicious meals. \n\nYou should use the right tools for each task.\nlist of tools:\nUse 'meals_COLLECTION_tool' to get relevant meals\nUse 'SearchWebTools' to search the web",
+          "returnIntermediateSteps": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        340,
+        0
+      ],
+      "id": "ff2f5fe7-7514-432b-ad71-a609fe904a5f",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "maxTries": 2
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsMistralCloud",
+      "typeVersion": 1,
+      "position": [
+        560,
+        360
+      ],
+      "id": "65b344d3-a38f-4761-8c14-dc3088645f57",
+      "name": "Embeddings Mistral Cloud",
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "LJvAbQuHR6tMnPwU",
+          "name": "Mistral Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "meals_COLLECTION_tool",
+        "toolDescription": "Use this tool to get list of meals. You will use this to suggest meals.",
+        "qdrantCollection": {
+          "__rl": true,
+          "mode": "id",
+          "value": "0917feed-86db-4004-93e8-55a907de0a94"
+        },
+        "topK": 2,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1.1,
+      "position": [
+        460,
+        220
+      ],
+      "id": "f5d734db-f48f-4c42-af9e-e8dc22dc831d",
+      "name": "RCL_COLLECTION",
+      "credentials": {
+        "qdrantApi": {
+          "id": "bGvIFhLDvF71Mdj8",
+          "name": "QdrantApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "gemma2-9b-it",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        220,
+        220
+      ],
+      "id": "73e4de98-752d-4cc6-af8a-b199cd9553bf",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "0DPhAlNnkz5IUv0y",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "typeVersion": 1,
+      "position": [
+        740,
+        220
+      ],
+      "id": "3da7d0af-cfdc-4cc9-ba66-202d8360c785",
+      "name": "SerpAPI",
+      "credentials": {
+        "serpApi": {
+          "id": "kZNlEiKloRx9KnOz",
+          "name": "SerpAPI account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Mistral Cloud": {
+      "ai_embedding": [
+        [
+          {
+            "node": "RCL_COLLECTION",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RCL_COLLECTION": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SerpAPI": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "4018c929-b1a6-4452-bc37-f9f5de3e12ae",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "de3e621f8dc7f36d653c611b2a4ed2aa0defff88337b25229f439afbf32ff1c7"
+  },
+  "id": "mfcQD6HiNell61XB",
+  "tags": []
+}
